@@ -1,0 +1,52 @@
+from rest_framework.response import Response
+from django.contrib.auth.models import User
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework.generics import GenericAPIView, ListCreateAPIView,  RetrieveUpdateDestroyAPIView
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import ListModelMixin
+from news.models import News, Comments, Category, Tag
+from news.serializers import CategorySerializer, NewsDetailSerializer, NewsListSerializer, CommentsSerializer, NewsValidateSerializer, TagSerializer
+
+class TagViewSet(ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    lookup_field = 'id'
+
+
+class CategoryListCreateAPIView(ListCreateAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    pagination_class = None
+
+class CategoryRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    lookup_field = 'id'
+
+class NewsService:
+    __model = News
+
+    @classmethod
+    def get_all(cls, *args, **kwargs):
+        return cls.__model.objects.all(
+            *args, **kwargs
+        )
+
+    @classmethod
+    def get_by_id(cls, news_id):
+        return cls.__model.objects.get(id=news_id)
+
+    @classmethod
+    def create(cls, **kwargs):
+        return cls.__model.objects.create(**kwargs)
+
+    @classmethod
+    def update(cls, news, **kwargs):
+        for attr, value in kwargs.items():
+            setattr(news, attr, value)
+        news.save()
+        return news
